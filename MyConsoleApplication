@@ -1,0 +1,155 @@
+
+using System;
+
+using System.Collections.Generic;
+
+using System.Linq;
+
+using System.Text;
+
+using System.Threading.Tasks;
+
+ 
+
+namespace ConsoleApplication3
+
+{
+
+   
+
+    public class FileDetail
+
+    {
+
+        public string FileName;
+
+        public string Location;
+
+        public DateTime FileCreatedOn = DateTime.MinValue;
+
+ 
+
+        public int InputOrder = 0;
+
+ 
+
+        public int PerLocationCount = 0;
+
+        public string CreatedOnOrder;
+
+ 
+
+        public string FileExtension { get { return FileName.Split('.')[1]; } }
+
+        public string GetCreatedOnOrderMod
+
+        {
+
+            get
+
+            {
+
+                while (CreatedOnOrder.Length < PerLocationCount.ToString().Length)
+
+                {
+
+                    CreatedOnOrder = "0" + CreatedOnOrder;
+
+                }
+
+                return CreatedOnOrder;
+
+            }
+
+        }
+
+        public string printOutput { get { return Location + GetCreatedOnOrderMod + "." + FileExtension; } }
+
+    }
+
+    class Program
+
+    {
+
+        static void Main(string[] args)
+
+        {
+
+            List<FileDetail> AllFiles = new List<FileDetail>();
+
+ 
+
+            Int16 Counter=0;
+
+            string line;
+
+ 
+
+            while (!String.IsNullOrWhiteSpace(line = Console.ReadLine()))
+
+            {
+
+                FileDetail file = new FileDetail();
+
+                string[] InputArray = line.Split(',');
+
+                file.FileName = InputArray[0];
+
+                file.Location = InputArray[1];
+
+                bool IsDateValid =DateTime.TryParse(InputArray[2], out file.FileCreatedOn) ;
+
+                file.InputOrder = Counter;
+
+                AllFiles.Add(file);
+
+                Counter++;
+
+            }
+
+ 
+
+            List<FileDetail> RankedFiles = AllFiles.GroupBy(x => x.Location)
+
+                .SelectMany(g => g.OrderBy(y => y.FileCreatedOn)
+
+                    .Select((n, i) =>
+
+                        new FileDetail
+
+                        { FileName = n.FileName,
+
+                            CreatedOnOrder = (i + 1).ToString(),
+
+                            Location = n.Location,
+
+                            InputOrder = n.InputOrder,
+
+                            PerLocationCount = g.Where( z => z.Location == n.Location).Count()
+
+                        }))
+
+                    .ToList();
+
+           
+
+            RankedFiles.Sort((x, y) => x.InputOrder.CompareTo(y.InputOrder));
+
+ 
+
+            for (int i = 0; i < RankedFiles.Count(); i++)
+
+            {
+
+                Console.WriteLine(RankedFiles[i].printOutput);
+
+            }
+
+            Console.ReadLine();
+
+        }
+
+    }
+
+}
+
